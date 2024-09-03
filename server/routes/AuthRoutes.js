@@ -1,11 +1,8 @@
-const express = require('express');
 const admin = require('firebase-admin');
 const User = require('../models/User');
+const express = require('express');
 
 const router = express.Router();
-
-// Helper function to generate a unique chat_id
-const generateChatId = () => `chat_${Math.random().toString(36).substr(2, 9)}`;
 
 router.post('/register-google', async (req, res) => {
     const { token, username, password } = req.body;
@@ -13,15 +10,14 @@ router.post('/register-google', async (req, res) => {
     try {
         const decodedToken = await admin.auth().verifyIdToken(token);
         const { uid, email } = decodedToken;
-
-        let user = await User.findOne({ uid });
+        let user = await User.findOne({ email });
+        const uidSlice = uid.slice(0, 6);
         if (!user) {
             user = new User({
-                username,
-                email,
-                uid,
-                password,  // Save the password provided by the user
-                chat_id: generateChatId(),
+                username: username,
+                email: email,
+                uid: uidSlice,
+                password:password,  
                 balance: 0.00,
                 business: 0.00,
                 shares: 0.00,
@@ -66,7 +62,6 @@ router.post('/register-google', async (req, res) => {
                 email,
                 uid,
                 password,  // Save the password provided by the user
-                chat_id: generateChatId(),
                 balance: 0.00,
                 business: 0.00,
                 shares: 0.00,

@@ -6,7 +6,6 @@ const UserSchema = new Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     uid: { type: String, required: true, unique: true },
-    chat_id: { type: String, required: true, unique: true },
     balance: { type: Number, default: 0.00 },
     business: { type: Number, default: 0.00 },
     shares: { type: Number, default: 0.00 },
