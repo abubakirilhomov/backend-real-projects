@@ -46,7 +46,6 @@ router.put('/update/:id', async (req, res) => {
         const updatedData = req.body;
 
         const updatedShop = await updateShop(shopId, updatedData);
-
         if (!updatedShop) {
             return res.status(404).json({ message: "Shop not found" });
         }
@@ -57,7 +56,6 @@ router.put('/update/:id', async (req, res) => {
     }
 });
 
-// Delete a shop by ID
 router.delete('/delete/:id', async (req, res) => {
     try {
         const shopId = req.params.id;
