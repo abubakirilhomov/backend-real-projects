@@ -1,7 +1,8 @@
 const express = require('express');
-const { getAllShop, createShop, getShopById, deleteShop } = require('../controllers/Shop');
+const { getAllShop, createShop, getShopById, deleteShop, updateShop } = require('../controllers/Shop');
 const router = express.Router();
 
+// Get all shops
 router.get('/all', async (req, res) => {
     try {
         const shops = await getAllShop();
@@ -11,10 +12,10 @@ router.get('/all', async (req, res) => {
     }
 });
 
-router.get('/', async (req, res) => {
+// Get a specific shop by ID
+router.get('/:id', async (req, res) => {
     try {
-        const shopId = req.bady.id;
-        console.log(req.params);
+        const shopId = req.params.id;
         const shop = await getShopById(shopId);
 
         if (!shop) {
@@ -27,6 +28,7 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Create a new shop
 router.post('/create', async (req, res) => {
     try {
         const { type_shop, product_name, description, price, product_type } = req.body;
@@ -37,15 +39,39 @@ router.post('/create', async (req, res) => {
     }
 });
 
-
-router.delete('/delete', async (req, res) => { 
+// Update a shop by ID
+router.put('/update/:id', async (req, res) => {
     try {
-        const shop_id = req.params.shop_id;
-        const deletedShop = await deleteShop(shop_id);
-        res.status(201).json({message: "Shop deleted successfully"})
-    }catch (error) {
+        const shopId = req.params.id;
+        const updatedData = req.body;
+
+        const updatedShop = await updateShop(shopId, updatedData);
+
+        if (!updatedShop) {
+            return res.status(404).json({ message: "Shop not found" });
+        }
+
+        res.status(200).json({ message: "Shop updated successfully", data: updatedShop });
+    } catch (error) {
         res.status(500).json({ message: error.message });
     }
-})
+});
+
+// Delete a shop by ID
+router.delete('/delete/:id', async (req, res) => {
+    try {
+        const shopId = req.params.id;
+        const deletedShop = await deleteShop(shopId);
+
+        if (!deletedShop) {
+            return res.status(404).json({ message: "Shop not found" });
+        }
+
+        res.status(200).json({ message: "Shop deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 module.exports = router;
+
