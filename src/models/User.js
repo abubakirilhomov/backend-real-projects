@@ -1,10 +1,21 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
+const tradeHistorySchema = new mongoose.Schema({
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+  productName: String,
+  action: String, // 'buy' or 'sell'
+  quantity: Number,
+  price: Number,
+  date: { type: Date, default: Date.now },
+});
+
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  balance: { type: Number, default: 1000 }, // Стартовый баланс
+  tradeHistory: [tradeHistorySchema],
 });
 
 userSchema.pre('save', async function (next) {
