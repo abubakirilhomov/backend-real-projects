@@ -1,4 +1,3 @@
-// controllers/updateProductValues.js
 const Product = require("../models/Product"); // Проверьте правильность пути
 
 // Максимальное количество объектов в массиве `values`
@@ -22,18 +21,14 @@ const updateProductsPeriodically = async () => {
       // Если длина массива `values` превышает MAX_VALUES_LENGTH, удаляем первый элемент
       if (product.values.length >= MAX_VALUES_LENGTH) {
         // Удаляем первый элемент массива
-        await Product.findByIdAndUpdate(
-          product._id,
-          { $pop: { values: -1 } } // Удаляет первый элемент из массива
-        );
+        product.values.shift();
       }
 
       // Добавляем новое значение в массив `values`
-      await Product.findByIdAndUpdate(
-        product._id,
-        { $push: { values: newValue } }, // Добавляем новое значение
-        { new: true } // Возвращает обновленный документ
-      );
+      product.values.push(newValue);
+
+      // Сохраняем обновленный продукт
+      await product.save();
 
       console.log(`Added new value to product ${product._id}:`, newValue);
     }

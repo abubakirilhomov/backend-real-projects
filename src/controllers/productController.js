@@ -1,5 +1,4 @@
-// controllers/productController.js
-const Product = require('../models/Product');
+const Product = require("../models/Product");
 
 // Получение всех продуктов
 exports.getAllProducts = async (req, res) => {
@@ -19,10 +18,10 @@ exports.createProduct = async (req, res) => {
     const newValue = {
       price,
       date: now.toLocaleDateString(),
-      time: now.toTimeString().split(' ')[0]
+      time: now.toTimeString().split(" ")[0],
     };
 
-    let product = await Product.findOne({ type, 'values.name': name });
+    let product = await Product.findOne({ type, "values.name": name });
 
     if (product) {
       // Добавляем новую цену к существующему продукту
@@ -38,9 +37,9 @@ exports.createProduct = async (req, res) => {
         values: [
           {
             name,
-            value: [newValue]
-          }
-        ]
+            value: [newValue],
+          },
+        ],
       });
     }
 
@@ -59,12 +58,14 @@ exports.cleanupOldValues = async () => {
 
     const products = await Product.find();
 
-    products.forEach(async (product) => {
+    for (let product of products) {
       product.values.forEach((value) => {
-        value.value = value.value.filter(record => new Date(`${record.date} ${record.time}`) > cutoff);
+        value.value = value.value.filter(
+          (record) => new Date(`${record.date} ${record.time}`) > cutoff
+        );
       });
       await product.save();
-    });
+    }
 
     console.log("Old values cleaned up");
   } catch (error) {
@@ -76,8 +77,9 @@ exports.cleanupOldValues = async () => {
 exports.deleteAllProducts = async (req, res) => {
   try {
     await Product.deleteMany({});
-    res.json({ message: 'All products deleted successfully' });
+    res.json({ message: "All products deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+``;
