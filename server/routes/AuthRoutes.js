@@ -1,6 +1,7 @@
 const admin = require('firebase-admin');
 const User = require('../models/User');
 const express = require('express');
+const mongoose = require('mongoose');
 
 const router = express.Router();
 
@@ -41,40 +42,40 @@ router.post('/signin-email', async (req, res) => {
 
         const userRecord = await admin.auth().getUserByEmail(email);
 
-        res.status(200).json({ message: 'Sign-in successful', uid: userRecord.uid });
+        res.status(200).json({ message: 'Sign-in successful', uid: userRecord.uid, email: email, });
     } catch (error) {
         console.error('Error during sign-in:', error);
         res.status(500).json({ error: 'Sign-in failed.' });
     }
 });
 
-router.post('/register-google', async (req, res) => {
-    const { token, username, password } = req.body;
+router.post('/register-email', async (req, res) => {
+    const { username, email, password } = req.body;  // Get email, username, and password from request body
 
     try {
-        const decodedToken = await admin.auth().verifyIdToken(token);
-        const { uid, email } = decodedToken;
-
-        let user = await User.findOne({ uid });
+        // Check if the email is already registered
+        let user = await User.findOne({ email });
         if (!user) {
+            // Create a new user if email is not found
+            const uid = new mongoose.Types.ObjectId();  // Generate a unique user ID
             user = new User({
                 username,
                 email,
                 uid,
-                password,  // Save the password provided by the user
+                password,  // Save the plain password (you might want to hash it using bcrypt)
                 balance: 0.00,
                 business: 0.00,
                 shares: 0.00,
                 crypto: 0.00,
                 inflationRate: '1.00%',
             });
-            await user.save();
+            await user.save();  // Save the new user in MongoDB
         }
 
-        res.status(200).json({ message: 'User registered successfully', uid });
+        res.status(200).json({ message: 'User registered successfully', uid: user.uid });
     } catch (error) {
-        console.error('Error verifying token:', error);
-        res.status(401).json({ error: 'Invalid or expired token' });
+        console.error('Error registering user:', error);
+        res.status(500).json({ error: 'Registration failed.' });
     }
 });
 
