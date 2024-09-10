@@ -1,4 +1,13 @@
+<<<<<<< HEAD
 // server.js или app.js
+=======
+const express = require('express');
+const dotenv = require('dotenv');
+const connectDB = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
+const shopRotuer =  require('./routes/shopRouter');
+const cors = require('cors');
+>>>>>>> 9a587a3b73b995e34b6e85482ca51c6d0894449e
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -33,10 +42,7 @@ const connectDB = require("./config/db");
 const Product = require("./models/Product");
 connectDB();
 
-// Определение маршрутов
-app.use("/api/products", productRoutes);
-app.use("/api/trade", tradeRoutes);
-app.use("/api/auth", authRoutes);
+
 
 // Создание сервера и интеграция с socket.io
 const server = require("http").createServer(app);
@@ -81,14 +87,16 @@ io.on("connection", (socket) => {
   });
 });
 
-// Очистка старых записей каждые 5 минут
 setInterval(cleanupOldValues, 5 * 60 * 1000);
-
-// Запуск обновления данных продуктов каждые 5 секунд
 setInterval(updateProductsPeriodically, 5000);
 
-// Запуск сервера
+// Определение маршрутов
+app.use("/api/products", productRoutes);
+app.use("/api/trade", tradeRoutes);
+app.use("/api/auth", authRoutes);
+app.use('/api/shop', shopRotuer)
+
 const PORT = process.env.PORT || 8000;
-server.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
