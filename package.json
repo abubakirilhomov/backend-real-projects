@@ -19,14 +19,9 @@
     "express": "^4.19.2",
     "firebase": "^10.13.0",
     "jsonwebtoken": "^9.0.2",
-<<<<<<< HEAD
     "mongoose": "^8.6.1",
     "nodemon": "^3.1.4",
     "socket.io": "^4.7.5",
     "ws": "^8.18.0"
-=======
-    "mongoose": "^8.5.4",
-    "nodemon": "^3.1.4"
->>>>>>> 9a587a3b73b995e34b6e85482ca51c6d0894449e
   }
 }
