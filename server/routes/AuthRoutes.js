@@ -53,17 +53,31 @@ router.post('/register-google', async (req, res) => {
 router.post('/login-email', async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email })
 
-        res.status(200).json({ message: 'Sign-in successful', uid: user.uid, email: user.email, balance: user.balance, shares: user.shares, crypto: user.crypto, business: user.business, inflationRate: user.inflationRate, username: user.username});
-    } catch (error) {
-        console.error('Error during sign-in:', error);
+        const user = await User.findOne({ email });
 
-        // Обработка ошибки, если пользователь не найден
-        if (error.code === 'auth/user-not-found') {
+        if (!user) {
             return res.status(404).json({ error: 'Пользователь с таким email не найден. Пожалуйста, зарегистрируйтесь.' });
         }
 
+        if (user.password !== password) {
+            return res.status(401).json({ error: 'Неправильный пароль. Пожалуйста, попробуйте снова.' });
+        }
+
+        res.status(200).json({ 
+            message: 'Sign-in successful', 
+            uid: user.uid, 
+            email: user.email, 
+            balance: user.balance, 
+            shares: user.shares, 
+            crypto: user.crypto, 
+            business: user.business, 
+            inflationRate: user.inflationRate, 
+            username: user.username 
+        });
+
+    } catch (error) {
+        console.error('Error during sign-in:', error);
         res.status(500).json({ error: 'Ошибка входа. Пожалуйста, попробуйте снова.' });
     }
 });
