@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
-    username: { type: String, required: true, unique: true },
+    username: { type: String, required: function() { return !this.uid }, unique: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    uid: { type: String, required: true, unique: true },
+    password: { type: String, required: function() { return !this.uid } },
+    uid: { type: String, unique: true },
     balance: { type: Number, default: 0.00 },
     business: { type: Number, default: 0.00 },
     shares: { type: Number, default: 0.00 },

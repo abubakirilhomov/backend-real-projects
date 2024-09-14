@@ -6,58 +6,84 @@ const mongoose = require('mongoose');
 const router = express.Router();
 
 router.post('/register-google', async (req, res) => {
-    const { token, username, password } = req.body;
+    const { token, username } = req.body;
 
     try {
+        // Verify Firebase token
         const decodedToken = await admin.auth().verifyIdToken(token);
         const { uid, email } = decodedToken;
+
+        // Check if user exists in MongoDB
         let user = await User.findOne({ email });
-        const uidSlice = uid.slice(0, 6);
-        if (!user) {
-            user = new User({
-                username: username,
-                email: email,
-                uid: uidSlice,
-                password:password,  
-                balance: 0.00,
-                business: 0.00,
-                shares: 0.00,
-                crypto: 0.00,
-                inflationRate: '1.00%',
-            });
-            await user.save();
+        if (user) {
+            // If user exists, return early with the error
+            return res.status(400).json({ error: 'User already exists' });
         }
 
-        res.status(200).json({ message: 'User registered successfully', uid });
+        // Create new user if not found
+        user = new User({
+            username: email,
+            email: email,
+            uid: uid,
+            balance: 0.00,
+            business: 0.00,
+            shares: 0.00,
+            crypto: 0.00,
+            inflationRate: '1.00%',
+        });
+        await user.save();
+
+        // Send success response
+        return res.status(200).json({
+            message: 'User registered successfully',
+            uid: user.uid,
+            email: user.email,
+            balance: user.balance,
+            business: user.business,
+            shares: user.shares,
+            crypto: user.crypto,
+            inflationRate: user.inflationRate
+        });
     } catch (error) {
         console.error('Error verifying token:', error);
-        res.status(401).json({ error: 'Invalid or expired token' });
+        return res.status(401).json({ error: 'Invalid or expired token' });
     }
 });
 
-
-router.post('/signin-email', async (req, res) => {
+router.post('/login-email', async (req, res) => {
     try {
         const { email, password } = req.body;
+        const user = await User.findOne({ email })
 
-        const userRecord = await admin.auth().getUserByEmail(email);
-
-        res.status(200).json({ message: 'Sign-in successful', uid: userRecord.uid, email: email, });
+        res.status(200).json({ message: 'Sign-in successful', uid: user.uid, email: user.email, balance: user.balance, shares: user.shares, crypto: user.crypto, business: user.business, inflationRate: user.inflationRate, username: user.username});
     } catch (error) {
         console.error('Error during sign-in:', error);
-        res.status(500).json({ error: 'Sign-in failed.' });
+
+        // Обработка ошибки, если пользователь не найден
+        if (error.code === 'auth/user-not-found') {
+            return res.status(404).json({ error: 'Пользователь с таким email не найден. Пожалуйста, зарегистрируйтесь.' });
+        }
+
+        res.status(500).json({ error: 'Ошибка входа. Пожалуйста, попробуйте снова.' });
     }
 });
 
 router.post('/register-email', async (req, res) => {
-    const { username, email, password } = req.body;  // Get email, username, and password from request body
+    const { username, email, password } = req.body;
 
     try {
-        // Check if the email is already registered
+        // Create a user in Firebase Authentication
+        const firebaseUser = await admin.auth().createUser({
+            email,
+            password,
+            displayName: username,
+        });
+
+        // Check if the email is already registered in MongoDB
         let user = await User.findOne({ email });
         if (!user) {
-            // Create a new user if email is not found
-            const uid = new mongoose.Types.ObjectId();  // Generate a unique user ID
+            // Create a new user in MongoDB if email is not found
+            const uid = firebaseUser.uid;  // Use Firebase's UID
             user = new User({
                 username,
                 email,
@@ -72,7 +98,7 @@ router.post('/register-email', async (req, res) => {
             await user.save();  // Save the new user in MongoDB
         }
 
-        res.status(200).json({ message: 'User registered successfully', uid: user.uid });
+        res.status(200).json({ message: 'User registered successfully', uid: user.uid, username: user.username, email: user.email, balance: user.balance, business: user.business, shares: user.shares, crypto: user.crypto, inflationRate: user.inflationRate});
     } catch (error) {
         console.error('Error registering user:', error);
         res.status(500).json({ error: 'Registration failed.' });
@@ -83,15 +109,26 @@ router.post('/login-google', async (req, res) => {
     const { token } = req.body;
 
     try {
+        // Verify Firebase token
         const decodedToken = await admin.auth().verifyIdToken(token);
-        const { uid } = decodedToken;
+        const { uid, email } = decodedToken;
 
-        const user = await User.findOne({ uid });
+        let user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }
 
-        res.status(200).json({ message: 'User signed in successfully', uid });
+        res.status(200).json({
+            message: 'User signed in successfully',
+            uid: user.uid,
+            username: user.username,
+            email: user.email,
+            balance: user.balance,
+            business: user.business,
+            shares: user.shares,
+            crypto: user.crypto,
+            inflationRate: user.inflationRate,
+        });
     } catch (error) {
         console.error('Error verifying token:', error);
         res.status(401).json({ error: 'Invalid or expired token' });
