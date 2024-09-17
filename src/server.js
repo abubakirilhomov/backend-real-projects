@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const socketIo = require("socket.io");
 require("dotenv").config();
+const admin = require('firebase-admin');
+
 
 // Import routes
 const productRoutes = require("./routes/productRoutes");
@@ -19,14 +21,17 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(
-  cors({
-    origin: "http://localhost:5173", // Adjust this if your frontend is hosted elsewhere
-    methods: "GET,POST,PUT,DELETE",
-    allowedHeaders: "Content-Type,Authorization",
-  })
-);
-
+const corsOptions = {
+  origin: '*',
+};
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173", // Adjust this if your frontend is hosted elsewhere
+//     methods: "GET,POST,PUT,DELETE",
+//     allowedHeaders: "Content-Type,Authorization",
+//   })
+// );
+app.use(cors(corsOptions));
 // MongoDB connection
 const connectDB = require("./config/db");
 const Product = require("./models/Product");
@@ -78,6 +83,13 @@ io.on("connection", (socket) => {
 // Clean up old values and update product data periodically
 setInterval(cleanupOldValues, 5 * 60 * 1000); // Clean up every 5 minutes
 setInterval(updateProductsPeriodically, 5000); // Update products every 5 seconds
+
+const serviceAccount = require('../../ServiceAccounts.json');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 
 // Define routes
 app.use("/api/products", productRoutes);
