@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Node.js
 node_modules/
 npm-debug.log*
@@ -47,3 +48,6 @@ Thumbs.db
 .idea/
 *.sublime-project
 *.sublime-workspace
+=======
+ServiceAccounts.json
+>>>>>>> c5be08af47e339045dc27a9780efb2dc3b35255d
