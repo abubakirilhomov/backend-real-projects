@@ -84,7 +84,7 @@ io.on("connection", (socket) => {
 setInterval(cleanupOldValues, 5 * 60 * 1000); // Clean up every 5 minutes
 setInterval(updateProductsPeriodically, 5000); // Update products every 5 seconds
 
-const serviceAccount = require("../../ServiceAccounts.json");
+const serviceAccount = require("../ServiceAccounts.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
