@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const socketIo = require("socket.io");
 require("dotenv").config();
-const admin = require('firebase-admin');
-
+const admin = require("firebase-admin");
+const userRoutes = require("./routes/userRoutes");
 
 // Import routes
 const productRoutes = require("./routes/productRoutes");
@@ -22,7 +22,7 @@ const app = express();
 // Middleware
 app.use(express.json());
 const corsOptions = {
-  origin: '*',
+  origin: "*",
 };
 // app.use(
 //   cors({
@@ -84,18 +84,18 @@ io.on("connection", (socket) => {
 setInterval(cleanupOldValues, 5 * 60 * 1000); // Clean up every 5 minutes
 setInterval(updateProductsPeriodically, 5000); // Update products every 5 seconds
 
-const serviceAccount = require('../../ServiceAccounts.json');
+const serviceAccount = require("../../ServiceAccounts.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
-
 
 // Define routes
 app.use("/api/products", productRoutes);
 app.use("/api/trade", tradeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/shop", shopRouter);
+app.use("/api/user", userRoutes); // Add this line to use the user routes
 
 // Start the server and listen on the specified port
 const PORT = process.env.PORT || 8000;
